@@ -18,8 +18,8 @@ feature_columns = ['setting1', 'setting2', 'setting3', 's1', 's2', 's3', 's4', '
 feature_columns_reduce = ['setting1', 'setting2','s2', 's3', 's4',  's6', 's7', 's8',
                    's9', 's11', 's12', 's13', 's14', 's15', 's17',  's20', 's21',
                    'cycle_norm']
-adj_columns = ['setting1', 'setting2','s2', 's3', 's4',  's6', 's7', 's8',
-                   's9', 's11', 's12', 's13', 's14', 's15', 's17',  's20', 's21', 'cycle_norm']
+adj_columns = ['s2', 's3', 's4',  's6', 's7', 's8',
+                   's9', 's11', 's12', 's13', 's14', 's15', 's17',  's20', 's21']
 
 def get_adj(input):
     adj = input[adj_columns].corr()
