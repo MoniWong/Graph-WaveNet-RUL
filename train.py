@@ -12,7 +12,7 @@ parser.add_argument('--device',type=str,default='cuda:0',help='')
 parser.add_argument('--fd_number',type=str,default='1',help='data path')
 parser.add_argument('--adjtype',type=str,default='normlap',help='adj type')
 parser.add_argument('--gcn_bool',type=bool,default=True,help='whether to add graph convolution layer')
-parser.add_argument('--aptonly',type=bool,default=False,help='whether only adaptive adj')
+parser.add_argument('--aptonly',type=bool,default=True,help='whether only adaptive adj')
 parser.add_argument('--addaptadj',type=bool,default=False,help='whether add adaptive adj')
 parser.add_argument('--randomadj',type=bool,default=False,help='whether random initialize adaptive adj')
 parser.add_argument('--seq_length',type=int,default=12,help='')
@@ -24,10 +24,10 @@ parser.add_argument('--batch_size',type=int,default=64,help='batch size')
 parser.add_argument('--learning_rate',type=float,default=0.001,help='learning rate')
 parser.add_argument('--dropout',type=float,default=0.3,help='dropout rate')
 parser.add_argument('--weight_decay',type=float,default=0.0001,help='weight decay rate')
-parser.add_argument('--epochs',type=int,default=1,help='')
-parser.add_argument('--print_every',type=int,default=50,help='')
+parser.add_argument('--epochs',type=int,default=150,help='')
+parser.add_argument('--print_every',type=int,default=100,help='')
 #parser.add_argument('--seed',type=int,default=99,help='random seed')
-parser.add_argument('--save',type=str,default='./garage/',help='save path')
+parser.add_argument('--save',type=str,default='./fd1/',help='save path')
 parser.add_argument('--expid',type=int,default=1,help='experiment id')
 
 args = parser.parse_args()
@@ -46,7 +46,7 @@ def main():
     #x_train,y_train:(23974,12,207,2) 
     #scaler = dataloader['scaler']
     data = dataLoader( bs = args.batch_size, sl = args.seq_length, fd_number =args.fd_number)
-    adj_mx = util.load_adj(data.adj_mx.values,args.adjtype)
+    adj_mx = util.load_adj(data.adj_mx.values,args.adjtype, args.normalized_k)
     #adj_mx = data.adj_mx.values
     supports = [torch.tensor(i).to(device) for i in adj_mx]
 
@@ -135,14 +135,14 @@ def main():
         train_his_loss.append(train_loss)
         log = 'Epoch: {:03d}, Train Loss: {:.4f}, Train RMSE: {:.4f}, Score: {:.4f}, Valid Loss: {:.4f}, Valid RMSE: {:.4f}, Score: {:.4f}, Training Time: {:.4f}/epoch'
         print(log.format(i, mtrain_loss,  mtrain_rmse, mtrain_score, mvalid_loss,  mvalid_rmse, mvalid_score, (t2 - t1)),flush=True)
-        if i%10==0:
-            torch.save(engine.model.state_dict(), args.save+"_epoch_"+str(i)+"_"+str(round(mvalid_loss,2))+".pth")
-            for k in range(5):
-                test_sample(k+2, engine, data, device, args.save+"epoch_"+str(i)+'_'+str(k))
+        if(i%10==0):
+            torch.save(engine.model.state_dict(), args.save+"fd1_"+str(round(mvalid_loss,2))+".pth")
+    for k in range(5):
+      test_sample(k+2, engine, data, device, args.save+"fd1_"+str(k))
     print("Average Training Time: {:.4f} secs/epoch".format(np.mean(train_time)))
     print("Average Inference Time: {:.4f} secs".format(np.mean(val_time)))
-    np.save(args.save + "valiloss.npy", his_loss)
-    np.save(args.save + "trainloss.npy", train_his_loss)
+    np.save(args.save +"fd1_"+ "valiloss.npy", his_loss)
+    np.save(args.save +"fd1_"+ "trainloss.npy", train_his_loss)
 
     #testing
 
